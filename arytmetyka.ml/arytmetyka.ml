@@ -1,8 +1,10 @@
 (* Autor: Kamil Poniewierski *)
+(* Code Review: Mateusz Kałużny *)
 
 (*  definicja *)
 (*  lewy oraz prawy koniec przedzialu, *)
-(*  Przedzial oznacza normalny przedzial, Dopelnienie to R - Przedial utworzony z tej samej pary *)
+(*  Przedzial oznacza normalny przedzial,
+    Dopelnienie to R - Przedzial utworzony z tej samej pary *)
 type wartosc =
     | Przedzial of float * float
     | Dopelnienie of float * float
@@ -13,14 +15,12 @@ type wartosc =
 (* wartosc_dokladnosc x p = x +/- p% *)
 (* war.pocz.: p > 0                  *)
 let wartosc_dokladnosc x p =
-    assert (p > 0.);
-    let k = abs_float (p *. x /. 100.) in (* x * p % *)
+    let k = abs_float (p *. x /. 100.) in (* x * (p %) *)
     Przedzial (x -. k, x +. k)
 
 (* wartosc_od_do x y = [x;y]         *)
 (* war.pocz.: x <= y                 *)
 let wartosc_od_do x y =
-    assert (x <= y);
     Przedzial (x, y)
 
 (* wartosc_dokladna x = [x;x]        *)
@@ -47,11 +47,11 @@ let max = safe_max;; (* analogicznie do nadpisania min *)
 let min_of_four a b c d = min (min a b) (min c d)
 let max_of_four a b c d = max (max a b) (max c d)
 
-(* min/max iloczyn z czterech liczb *)
+(* min/max iloczyn z dwoch par, element pary 1 * element pary 2 *)
 let min_iloczyn a b c d = min_of_four (a *. c) (a *. d) (b *. c) (b *. d)
 let max_iloczyn a b c d = max_of_four (a *. c) (a *. d) (b *. c) (b *. d)
 
-(* in_wartosc w x = x \in w *)
+(* sprawdza czy x jest w przedziale w *)
 let in_wartosc w x =
     match w with
     | Przedzial (a, b) -> (a <= x) && (x <= b)      (* x jest w srodku przedzialu *)
@@ -83,23 +83,20 @@ let odwrotny w =
     | Dopelnienie (a, b) ->
         Przedzial (min (1. /. a) (1. /. b), max (1. /. a) (1. /. b))
 
-(* lewa strona Dopelnienia, jeden z dwoch przedzialow *)
+(* lewa strona Dopelnienia, jeden z dwoch Przedzialow *)
 let split_lewy w =
     match w with
     | Dopelnienie (a, _) -> Przedzial (neg_infinity, a)
     | x -> x
 
-(* prawa strona Dopelnienia, jeden z dwoch przedzialow *)
+(* prawa strona Dopelnienia, jeden z dwoch Przedzialow *)
 let split_prawy w =
     match w with
     | Dopelnienie (_, b) -> Przedzial (b, infinity)
     | x -> x
 
-
-
 (* min_wartosc w = najmniejsza możliwa wartość w,   *)
 (* lub neg_infinity jeśli brak dolnego ograniczenia.*)
-(*val min_wartosc: wartosc -> float *)
 let min_wartosc w =
     match w with
     | Przedzial (a, b) -> a
@@ -108,7 +105,6 @@ let min_wartosc w =
 
 (* max_wartosc w = największa możliwa wartość w,    *)
 (* lub infinity jeśli brak górnego ograniczenia.    *)
-(* val max_wartosc: wartosc -> float *)
 let max_wartosc w =
     match w with
     | Przedzial (a, b) -> b
@@ -117,7 +113,6 @@ let max_wartosc w =
 
 (* środek przedziału od min_wartosc do max_wartosc, *)
 (* lub nan jeśli min i max_wartosc nie są określone.*)
-(* val sr_wartosc:  wartosc -> float *)
 let sr_wartosc w =
     match w with
     | Przedzial (a, b) when (is_inf) a && (is_inf b) -> nan
@@ -168,7 +163,6 @@ let rec ogolne_dzialanie x y f =
         sumuj (sumuj k l) (sumuj m n)
 
 (* Operacje arytmetyczne na niedokładnych wartościach. *)
-
 let rec plus x y = 
     match (x, y) with
     | (Przedzial (a, b), Przedzial (c, d)) -> (Przedzial (a +. c, b +. d))
@@ -187,7 +181,8 @@ let rec razy x y =
 
 let podzielic x y = razy x (odwrotny y)
 
-(*let a = wartosc_od_do (-1.) 1.            (* <-1, 1> *)
+(*
+let a = wartosc_od_do (-1.) 1.            (* <-1, 1> *)
 let b = wartosc_dokladna (-1.)            (* <-1, -1> *)
 let c = podzielic b a                     (* (-inf -1> U <1 inf) *)
 let d = plus c a                          (* (-inf, inf) *)
