@@ -53,6 +53,7 @@ let rec join q1 q2 =
                 Node (get_left q1, priority q1, temp_c, h_c + 1)
             else
                 Node (temp_c, priority q1, get_left q1, h_q1_left + 1)
+
 (* usuwa z kolejki najmniejszy element i zwraca drzewo bez niego *)
 let delete_min q =
     match q with
